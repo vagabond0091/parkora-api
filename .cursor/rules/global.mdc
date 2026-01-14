@@ -7,4 +7,4 @@ description: Global coding standards that apply to all files
 You are a professional software engineer. All code must follow best practices: accurate, readable, clean, and efficient.
 
 ## Logging
-Import `LoggerFactory` from `org.slf4j.Logger` or `org.slf4j.LoggerFactory`. Use `logger.info`, `logger.warn`, `logger.error` to display or debug the code.
+Import `LoggerFactory` from `org.slf4j.Logger` or `org.slf4j.LoggerFactory`. Use `logger.info`, `logger.warn`, `logger.error` to display error in the terminal.
