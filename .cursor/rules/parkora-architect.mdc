@@ -4,6 +4,38 @@ globs: api/src/main/java/com/parkora/**
 ---
 
 # Parkora App Architecture
+## Core Principles
+
+- **Object-Oriented Design (OOP)**  
+  - Encapsulate behavior and data inside cohesive classes.  
+  - Favor composition over inheritance where possible.  
+  - Model domain concepts explicitly (e.g., `User`, `Role`, `JwtProperties`).
+
+- **DTOs for API Boundaries**  
+  - Use dedicated DTOs for all controller inputs/outputs (`*Request`, `*Response`).  
+  - Never expose JPA entities directly in controller responses.  
+  - Keep DTOs free of persistence concerns (no JPA annotations).
+
+- **SOLID Principles (applied to controllers and services)**  
+  - **S – Single Responsibility**  
+    - Controllers in `controller/` only handle HTTP concerns (routing, status codes, mapping DTOs).  
+    - Services in `service/` / `service/impl/` own the business logic and orchestration, not controllers.  
+  - **O – Open/Closed**  
+    - Add new behavior by adding new service methods or implementations rather than bloating existing controllers.  
+    - Controllers call service interfaces; new flows are introduced in the service layer.  
+  - **L – Liskov Substitution**  
+    - Controllers depend on service **interfaces** (e.g., `RegisterService`), and any `*Impl` must be interchangeable without controller changes.  
+  - **I – Interface Segregation**  
+    - Prefer multiple small, focused service interfaces (e.g., auth, registration, user query) instead of one overly large, catch‑all service.  
+    - Controllers inject only the interfaces they actually need.  
+  - **D – Dependency Inversion**  
+    - High-level modules (controllers, orchestration services) depend on abstractions in `service/`, not on `repository/` or concrete `*Impl` classes.  
+    - Spring wires implementations (`service/impl/`) into these interfaces.
+
+- **DRY (Don’t Repeat Yourself)**  
+  - Extract shared logic into `service/common`, `util`, or reusable helper methods.  
+  - Avoid duplicating validation, mapping, or security code across controllers/services.  
+  - Prefer central configuration and constants for cross-cutting concerns.
 
 ## Root-Level Structure
 
@@ -29,3 +61,4 @@ parkora/api/
 │   └── impl/               # Service implementations
 └── test/                   # Test utilities and helpers
 ```
+
