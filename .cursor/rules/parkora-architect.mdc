@@ -1,0 +1,31 @@
+---
+description: Core architecture principles for the Parkora app
+globs: api/src/main/java/com/parkora/**
+---
+
+# Parkora App Architecture
+
+## Root-Level Structure
+
+<!-- 
+Root-level structure for the Parkora API application.
+All Java source code follows this directory organization under com.parkora.api package.
+-->
+
+```
+parkora/api/
+├── config/                 # Configuration classes (SecurityConfig, JwtProperties, etc.)
+├── controller/             # REST API controllers
+├── dto/                    # Data Transfer Objects (request/response DTOs)
+├── entity/                 # JPA entities and domain models
+│   └── common/             # Common base entities
+├── repository/             # Spring Data JPA repositories
+├── util/                   # Shared utilities and helper classes
+├── lib/                    # Third-party library integrations
+├── providers/              # External service providers
+├── security/               # Security-related classes (filters, etc.)
+├── service/                # Business logic service layer
+│   ├── common/             # Common service base classes and utilities
+│   └── impl/               # Service implementations
+└── test/                   # Test utilities and helpers
+```
