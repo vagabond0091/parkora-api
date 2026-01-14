@@ -62,3 +62,15 @@ parkora/api/
 └── test/                   # Test utilities and helpers
 ```
 
+## Naming Conventions
+- **Files / Classes / Enums**  
+  - Use **PascalCase** for Java types and filenames (e.g., `AuthController.java`, `RegisterServiceImpl.java`, `JwtProperties.java`).  
+  - File names must match the primary public class in the file.
+
+- **Variables / Fields / Parameters / Local objects**  
+  - Use **camelCase** (e.g., `jwtService`, `registerRequest`, `userRepository`).  
+  - Avoid ambiguous short names; prefer descriptive names that express intent.
+
+- **Packages**  
+  - Use **lowercase dot‑separated package names** (e.g., `com.parkora.api.controller`, `com.parkora.api.service.impl`).  
+  - Do not use uppercase letters, underscores, or hyphens in package names.
