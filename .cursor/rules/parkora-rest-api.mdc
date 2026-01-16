@@ -7,9 +7,16 @@ globs: api/src/main/java/com/parkora/api/controller/**
 
 ## API Base Path
 
-- **All API endpoints must be prefixed with `/api`**  
-  - Use `@RequestMapping("/api/{resource}")` at the controller level.  
-  - Example: `@RequestMapping("/api/auth")`, `@RequestMapping("/api/users")`.
+- **All API endpoints must use the base path `/api/v1`**  
+  - Use `@RequestMapping("/api/v1/{resource}")` at the controller level.  
+  - The resource name should be derived from the controller class name by removing the "Controller" suffix and converting to lowercase.
+  
+- **Controller class name to URL path mapping**  
+  - Controller class name: `UserController` → URL path: `/api/v1/user`  
+  - Controller class name: `AuthController` → URL path: `/api/v1/auth`  
+  - Controller class name: `UserProfileController` → URL path: `/api/v1/user-profile` (convert CamelCase to kebab-case)  
+  - Controller class name: `OrderItemController` → URL path: `/api/v1/order-item`  
+  - Example: `@RequestMapping("/api/v1/user")` for `UserController`, `@RequestMapping("/api/v1/auth")` for `AuthController`.
 
 ## HTTP Methods and Semantics
 
@@ -37,19 +44,19 @@ globs: api/src/main/java/com/parkora/api/controller/**
 ## URL Naming Conventions
 
 - **Use plural nouns for resource names**  
-  - **Correct:** `/api/users`, `/api/posts`, `/api/orders`  
-  - **Bad practice:** `/api/user`, `/api/post`, `/api/order`
+  - **Correct:** `/api/v1/users`, `/api/v1/posts`, `/api/v1/orders`  
+  - **Bad practice:** `/api/v1/user`, `/api/v1/post`, `/api/v1/order`
 
 - **Use lowercase with hyphens for multi-word resources**  
-  - **Correct:** `/api/user-profiles`, `/api/order-items`  
-  - **Bad practice:** `/api/userProfiles`, `/api/user_profiles`
+  - **Correct:** `/api/v1/user-profiles`, `/api/v1/order-items`  
+  - **Bad practice:** `/api/v1/userProfiles`, `/api/v1/user_profiles`
 
 - **Use path variables for resource identifiers**  
-  - **Correct:** `/api/users/{id}`, `/api/posts/{postId}`  
-  - **Bad practice:** `/api/users?id=123` (use query params only for filtering, not IDs)
+  - **Correct:** `/api/v1/users/{id}`, `/api/v1/posts/{postId}`  
+  - **Bad practice:** `/api/v1/users?id=123` (use query params only for filtering, not IDs)
 
 - **Use nested paths for sub-resources**  
-  - **Correct:** `/api/users/{userId}/orders`, `/api/posts/{postId}/comments`  
+  - **Correct:** `/api/v1/users/{userId}/orders`, `/api/v1/posts/{postId}/comments`  
   - Ensure the parent resource exists before accessing sub-resources.
 
 ## HTTP Status Codes
