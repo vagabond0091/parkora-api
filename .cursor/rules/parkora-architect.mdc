@@ -59,7 +59,6 @@ parkora/api/
 ├── service/                # Business logic service layer
 │   ├── common/             # Common service base classes and utilities
 │   └── impl/               # Service implementations
-└── test/                   # Test utilities and helpers
 ```
 
 ## Naming Conventions
