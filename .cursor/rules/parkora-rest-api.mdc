@@ -1,0 +1,157 @@
+---
+description: RESTful API conventions and best practices for Parkora API endpoints
+globs: api/src/main/java/com/parkora/api/controller/**
+---
+
+# Parkora REST API Conventions
+
+## API Base Path
+
+- **All API endpoints must be prefixed with `/api`**  
+  - Use `@RequestMapping("/api/{resource}")` at the controller level.  
+  - Example: `@RequestMapping("/api/auth")`, `@RequestMapping("/api/users")`.
+
+## HTTP Methods and Semantics
+
+- **GET** – Retrieve resources (idempotent, no side effects)  
+  - Use for fetching single resources or collections.  
+  - Never use GET for operations that modify state.
+
+- **POST** – Create new resources or perform actions  
+  - Use for creating resources (returns `201 CREATED`).  
+  - Use for non-idempotent operations (e.g., login, registration).  
+  - Request body should contain the resource data.
+
+- **PUT** – Replace/update entire resource (idempotent)  
+  - Use when updating all fields of a resource.  
+  - Client must send the complete resource representation.
+
+- **PATCH** – Partial update (idempotent)  
+  - Use when updating only specific fields of a resource.  
+  - Client sends only the fields to be modified.
+
+- **DELETE** – Remove resources (idempotent)  
+  - Use for deleting resources.  
+  - Returns `204 NO CONTENT` on success or `404 NOT FOUND` if resource doesn't exist.
+
+## URL Naming Conventions
+
+- **Use plural nouns for resource names**  
+  - ✅ `/api/users`, `/api/posts`, `/api/orders`  
+  - ❌ `/api/user`, `/api/post`, `/api/order`
+
+- **Use lowercase with hyphens for multi-word resources**  
+  - ✅ `/api/user-profiles`, `/api/order-items`  
+  - ❌ `/api/userProfiles`, `/api/user_profiles`
+
+- **Use path variables for resource identifiers**  
+  - ✅ `/api/users/{id}`, `/api/posts/{postId}`  
+  - ❌ `/api/users?id=123` (use query params only for filtering, not IDs)
+
+- **Use nested paths for sub-resources**  
+  - ✅ `/api/users/{userId}/orders`, `/api/posts/{postId}/comments`  
+  - Ensure the parent resource exists before accessing sub-resources.
+
+## HTTP Status Codes
+
+- **200 OK** – Successful GET, PUT, PATCH requests  
+  - Standard success response for retrieval and updates.
+
+- **201 CREATED** – Successful POST that creates a new resource  
+  - Include `Location` header with the URI of the created resource when appropriate.  
+  - Response body should contain the created resource or its identifier.
+
+- **204 NO CONTENT** – Successful DELETE or PUT/PATCH with no response body  
+  - Use when the operation succeeds but no content needs to be returned.
+
+- **400 BAD REQUEST** – Invalid request (validation errors, malformed data)  
+  - Use for client errors in request format or validation failures.
+
+- **401 UNAUTHORIZED** – Authentication required or failed  
+  - Use when the client is not authenticated or credentials are invalid.
+
+- **403 FORBIDDEN** – Authenticated but not authorized  
+  - Use when the user is authenticated but lacks permission for the operation.
+
+- **404 NOT FOUND** – Resource not found  
+  - Use when the requested resource doesn't exist.
+
+- **409 CONFLICT** – Resource conflict (e.g., duplicate username/email)  
+  - Use when the request conflicts with the current state (e.g., unique constraint violation).
+
+- **500 INTERNAL SERVER ERROR** – Server-side errors  
+  - Avoid exposing internal error details in production responses.
+
+## Request/Response Patterns
+
+- **Always use DTOs for request/response bodies**  
+  - Controllers must accept `*Request` DTOs (e.g., `LoginRequest`, `RegisterRequest`).  
+  - Controllers must return `*Response` DTOs or `ResponseEntity<T>`.  
+  - Never expose JPA entities directly in controller methods.
+
+- **Use `@Valid` annotation for request validation**  
+  - Apply `@Valid` to `@RequestBody` parameters to trigger Jakarta Bean Validation.  
+  - Example: `public ResponseEntity<T> create(@Valid @RequestBody CreateRequest request)`
+
+- **Use `ResponseEntity<T>` for explicit status codes**  
+  - Prefer `ResponseEntity.ok()`, `ResponseEntity.status(HttpStatus.CREATED)`, etc.  
+  - Avoid returning raw types when status codes matter.
+
+- **Return appropriate response types**  
+  - Single resource: `ResponseEntity<ResourceResponse>`  
+  - Collection: `ResponseEntity<List<ResourceResponse>>` or use pagination.  
+  - Success with no body: `ResponseEntity<Void>` or `ResponseEntity.noContent()`
+
+## Error Handling
+
+- **Use consistent error response structure**  
+  - Consider creating a standard `ErrorResponse` DTO for error responses.  
+  - Include error message, error code, and optionally field-level validation errors.
+
+- **Handle exceptions in controllers appropriately**  
+  - Use `@ControllerAdvice` for global exception handling when possible.  
+  - Avoid try-catch blocks in controllers unless handling specific business logic exceptions.  
+  - Let validation exceptions be handled by Spring's validation framework.
+
+- **Return meaningful error messages**  
+  - Provide clear, actionable error messages to clients.  
+  - Avoid exposing internal implementation details or stack traces.
+
+## Authentication & Authorization
+
+- **Use JWT tokens for authentication**  
+  - Include JWT token in `Authorization: Bearer <token>` header.  
+  - Validate tokens using `JwtAuthenticationFilter` or similar security filters.
+
+- **Protect endpoints appropriately**  
+  - Public endpoints: `/api/auth/login`, `/api/auth/register`  
+  - Protected endpoints: Require valid JWT token.  
+  - Use Spring Security annotations (`@PreAuthorize`, `@Secured`) for method-level security.
+
+## Query Parameters & Filtering
+
+- **Use query parameters for filtering, sorting, and pagination**  
+  - Filtering: `/api/users?role=ADMIN&status=ACTIVE`  
+  - Sorting: `/api/users?sort=createdAt&order=desc`  
+  - Pagination: `/api/users?page=0&size=20`
+
+- **Use consistent pagination parameters**  
+  - Standard: `page` (0-based) and `size` (items per page).  
+  - Return pagination metadata in response (total count, total pages, etc.).
+
+## Versioning (Future Consideration)
+
+- **Consider API versioning for breaking changes**  
+  - URL versioning: `/api/v1/users`, `/api/v2/users`  
+  - Header versioning: `Accept: application/vnd.parkora.v1+json`  
+  - Document versioning strategy if multiple versions will coexist.
+
+## Documentation
+
+- **Use descriptive method names**  
+  - Method names should clearly indicate the operation (e.g., `registerUser`, `authenticateUser`).  
+  - Avoid generic names like `handle`, `process`, `doSomething`.
+
+- **Consider adding OpenAPI/Swagger annotations**  
+  - Use `@Operation`, `@ApiResponse` for API documentation.  
+  - Document request/response schemas, status codes, and error cases.
