@@ -37,19 +37,19 @@ globs: api/src/main/java/com/parkora/api/controller/**
 ## URL Naming Conventions
 
 - **Use plural nouns for resource names**  
-  - ✅ `/api/users`, `/api/posts`, `/api/orders`  
-  - ❌ `/api/user`, `/api/post`, `/api/order`
+  - **Correct:** `/api/users`, `/api/posts`, `/api/orders`  
+  - **Bad practice:** `/api/user`, `/api/post`, `/api/order`
 
 - **Use lowercase with hyphens for multi-word resources**  
-  - ✅ `/api/user-profiles`, `/api/order-items`  
-  - ❌ `/api/userProfiles`, `/api/user_profiles`
+  - **Correct:** `/api/user-profiles`, `/api/order-items`  
+  - **Bad practice:** `/api/userProfiles`, `/api/user_profiles`
 
 - **Use path variables for resource identifiers**  
-  - ✅ `/api/users/{id}`, `/api/posts/{postId}`  
-  - ❌ `/api/users?id=123` (use query params only for filtering, not IDs)
+  - **Correct:** `/api/users/{id}`, `/api/posts/{postId}`  
+  - **Bad practice:** `/api/users?id=123` (use query params only for filtering, not IDs)
 
 - **Use nested paths for sub-resources**  
-  - ✅ `/api/users/{userId}/orders`, `/api/posts/{postId}/comments`  
+  - **Correct:** `/api/users/{userId}/orders`, `/api/posts/{postId}/comments`  
   - Ensure the parent resource exists before accessing sub-resources.
 
 ## HTTP Status Codes
