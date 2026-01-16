@@ -39,7 +39,8 @@ globs: api/src/main/java/com/parkora/api/controller/**
 
 - **DELETE** – Remove resources (idempotent)  
   - Use for deleting resources.  
-  - Returns `204 NO CONTENT` on success or `404 NOT FOUND` if resource doesn't exist.
+  - Returns `200 OK` with `ApiResponse` wrapper (data can be null or contain success message) on success.  
+  - Returns `404 NOT FOUND` with `ApiResponse` wrapper containing error message if resource doesn't exist.
 
 ## URL Naming Conventions
 
@@ -100,20 +101,78 @@ globs: api/src/main/java/com/parkora/api/controller/**
   - Apply `@Valid` to `@RequestBody` parameters to trigger Jakarta Bean Validation.  
   - Example: `public ResponseEntity<T> create(@Valid @RequestBody CreateRequest request)`
 
-- **Use `ResponseEntity<T>` for explicit status codes**  
-  - Prefer `ResponseEntity.ok()`, `ResponseEntity.status(HttpStatus.CREATED)`, etc.  
-  - Avoid returning raw types when status codes matter.
+- **All API responses must use the generic `ApiResponse<T>` wrapper**  
+  - Every endpoint must return `ResponseEntity<ApiResponse<T>>` where `T` is the actual data type.  
+  - The `ApiResponse` wrapper must contain:  
+    - `message` (String) – Descriptive message about the operation result.  
+    - `errorCode` (Integer) – Numeric HTTP status code (e.g., 400, 404, 500). For success responses, use 200 or null.  
+    - `status` (String) – Descriptive status indicator (e.g., "SUCCESS", "BAD_REQUEST", "INTERNAL_ERROR", "NOT_FOUND").  
+    - `data` (T) – The actual response data (can be null for operations without data).  
+  - Example success structure:  
+    ```java
+    ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
+        .message("User retrieved successfully")
+        .errorCode(200)
+        .status("SUCCESS")
+        .data(userResponse)
+        .build();
+    return ResponseEntity.ok(response);
+    ```
+  - Example error structure:  
+    ```java
+    ApiResponse<ErrorDetails> errorResponse = ApiResponse.<ErrorDetails>builder()
+        .message("User not found")
+        .errorCode(404)
+        .status("NOT_FOUND")
+        .data(null)
+        .build();
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    ```
 
-- **Return appropriate response types**  
-  - Single resource: `ResponseEntity<ResourceResponse>`  
-  - Collection: `ResponseEntity<List<ResourceResponse>>` or use pagination.  
-  - Success with no body: `ResponseEntity<Void>` or `ResponseEntity.noContent()`
+- **Response types with `ApiResponse` wrapper**  
+  - Single resource: `ResponseEntity<ApiResponse<ResourceResponse>>`  
+  - Collection: `ResponseEntity<ApiResponse<List<ResourceResponse>>>`  
+  - Success with no data: `ResponseEntity<ApiResponse<Void>>` or `ResponseEntity<ApiResponse<Object>>` with `data: null`  
+  - Error responses: `ResponseEntity<ApiResponse<ErrorDetails>>` with appropriate status code and error message
 
 ## Error Handling
 
 - **Use consistent error response structure**  
-  - Consider creating a standard `ErrorResponse` DTO for error responses.  
-  - Include error message, error code, and optionally field-level validation errors.
+  - All error responses must use the `ApiResponse` wrapper with appropriate error details.  
+  - The `message` field should contain a clear, actionable error message.  
+  - The `errorCode` field must contain the numeric HTTP status code (e.g., 400, 404, 409, 500).  
+  - The `status` field should contain a descriptive status string in UPPER_SNAKE_CASE (e.g., "BAD_REQUEST", "NOT_FOUND", "INTERNAL_ERROR", "CONFLICT", "VALIDATION_ERROR").  
+  - The `data` field can contain additional error details, validation errors, or field-level validation errors.  
+  - Common error code and status mappings:  
+    - `400` → `"BAD_REQUEST"` or `"VALIDATION_ERROR"`  
+    - `401` → `"UNAUTHORIZED"`  
+    - `403` → `"FORBIDDEN"`  
+    - `404` → `"NOT_FOUND"`  
+    - `409` → `"CONFLICT"`  
+    - `500` → `"INTERNAL_ERROR"`  
+  - Example error response structure:  
+    ```java
+    ApiResponse<ErrorDetails> errorResponse = ApiResponse.<ErrorDetails>builder()
+        .message("Validation failed")
+        .errorCode(400)
+        .status("BAD_REQUEST")
+        .data(ErrorDetails.builder()
+            .field("email")
+            .message("Email is required")
+            .build())
+        .build();
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    ```
+  - Example internal server error:  
+    ```java
+    ApiResponse<Void> errorResponse = ApiResponse.<Void>builder()
+        .message("An unexpected error occurred")
+        .errorCode(500)
+        .status("INTERNAL_ERROR")
+        .data(null)
+        .build();
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    ```
 
 - **Handle exceptions in controllers appropriately**  
   - Use `@ControllerAdvice` for global exception handling when possible.  
@@ -131,16 +190,16 @@ globs: api/src/main/java/com/parkora/api/controller/**
   - Validate tokens using `JwtAuthenticationFilter` or similar security filters.
 
 - **Protect endpoints appropriately**  
-  - Public endpoints: `/api/auth/login`, `/api/auth/register`  
+  - Public endpoints: `/api/v1/auth/login`, `/api/v1/auth/register`  
   - Protected endpoints: Require valid JWT token.  
   - Use Spring Security annotations (`@PreAuthorize`, `@Secured`) for method-level security.
 
 ## Query Parameters & Filtering
 
 - **Use query parameters for filtering, sorting, and pagination**  
-  - Filtering: `/api/users?role=ADMIN&status=ACTIVE`  
-  - Sorting: `/api/users?sort=createdAt&order=desc`  
-  - Pagination: `/api/users?page=0&size=20`
+  - Filtering: `/api/v1/users?role=ADMIN&status=ACTIVE`  
+  - Sorting: `/api/v1/users?sort=createdAt&order=desc`  
+  - Pagination: `/api/v1/users?page=0&size=20`
 
 - **Use consistent pagination parameters**  
   - Standard: `page` (0-based) and `size` (items per page).  
