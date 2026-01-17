@@ -36,14 +36,42 @@ globs: api/src/test/java/com/parkora/**
 ## Test Structure and Naming
 
 - **Test class naming**  
+  - **Standard approach (preferred)**: One test class per implementation class.  
+    - Test class name should match the class under test with `Test` suffix (e.g., `RegisterServiceImplTest` for `RegisterServiceImpl`).  
+    - This keeps all tests for a service together and allows shared setup/helper methods.  
+    - Use clear method naming to organize tests by method (e.g., `registerUser_withValidRequest_shouldReturnSuccess()`).  
+  - **Alternative approach (when needed)**: Split large test classes by method when a service class becomes very large (500+ lines, 10+ methods with extensive test coverage).  
+    - Use pattern: `ServiceImpl_MethodNameTest` (e.g., `RegisterServiceImpl_RegisterTest`, `RegisterServiceImpl_UpdateTest`).  
+    - Only split when the standard approach becomes unmanageable.  
+    - Extract shared helper methods to a common base test class or utility class to avoid duplication.  
   - Test classes must end with `Test` or `Tests` suffix.  
-  - Test class name should match the class under test with `Test` suffix (e.g., `UserServiceTest` for `UserService`).  
   - Use `@ExtendWith(MockitoExtension.class)` for unit tests or `@SpringBootTest` for integration tests.
 
 - **Test method naming**  
   - Test methods should be descriptive and follow the pattern: `methodName_scenario_expectedBehavior()`.  
   - Use camelCase for test method names.  
-  - Example: `registerUser_withValidRequest_shouldReturnSuccess()`, `registerUser_withDuplicateEmail_shouldThrowException()`.
+  - Example: `registerUser_withValidRequest_shouldReturnSuccess()`, `registerUser_withDuplicateEmail_shouldThrowException()`.  
+  - When using per-method test classes, the method name is already implied by the class name, so method names can be: `withValidRequest_shouldReturnSuccess()`.
+
+- **Organizing tests within a class**  
+  - Group test methods by the method being tested using comments or inner test classes (optional).  
+  - Example grouping:  
+    ```java
+    @ExtendWith(MockitoExtension.class)
+    class RegisterServiceImplTest {
+        
+        // Register method tests
+        @Test
+        void registerUser_withValidRequest_shouldReturnSuccess() { ... }
+        
+        @Test
+        void registerUser_withDuplicateEmail_shouldThrowException() { ... }
+        
+        // Update method tests
+        @Test
+        void updateUser_withValidRequest_shouldReturnSuccess() { ... }
+    }
+    ```
 
 ## Given-When-Then Pattern
 
