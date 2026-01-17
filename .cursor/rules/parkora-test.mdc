@@ -1,0 +1,289 @@
+---
+description: JUnit testing conventions and best practices for Parkora API test cases
+globs: api/src/test/java/com/parkora/**
+---
+
+# Parkora JUnit Testing Conventions
+
+## Test Structure and Naming
+
+- **Test class naming**  
+  - Test classes must end with `Test` or `Tests` suffix.  
+  - Test class name should match the class under test with `Test` suffix (e.g., `UserServiceTest` for `UserService`).  
+  - Use `@ExtendWith(MockitoExtension.class)` for unit tests or `@SpringBootTest` for integration tests.
+
+- **Test method naming**  
+  - Test methods should be descriptive and follow the pattern: `methodName_scenario_expectedBehavior()`.  
+  - Use camelCase for test method names.  
+  - Example: `registerUser_withValidRequest_shouldReturnSuccess()`, `registerUser_withDuplicateEmail_shouldThrowException()`.
+
+## Given-When-Then Pattern
+
+- **All test cases must follow the Given-When-Then (Arrange-Act-Assert) pattern**  
+  - **Given (Arrange)**: Set up test data, mock dependencies, and prepare the test environment.  
+  - **When (Act)**: Execute the method or action being tested.  
+  - **Then (Assert)**: Verify the expected outcome, verify mock interactions, and assert results.  
+  - Use clear comments to separate the three phases.
+
+- **Example structure:**
+  ```java
+  @Test
+  void registerUser_withValidRequest_shouldReturnSuccess() {
+      // Given
+      RegisterRequest request = RegisterRequest.builder()
+          .username("john.doe")
+          .email("john@example.com")
+          .password("password123")
+          .build();
+      
+      User savedUser = User.builder()
+          .id(1L)
+          .username("john.doe")
+          .email("john@example.com")
+          .build();
+      
+      when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.empty());
+      when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+      when(userRepository.save(any(User.class))).thenReturn(savedUser);
+      
+      // When
+      User result = registerService.register(request);
+      
+      // Then
+      assertThat(result).isNotNull();
+      assertThat(result.getUsername()).isEqualTo("john.doe");
+      assertThat(result.getEmail()).isEqualTo("john@example.com");
+      verify(userRepository).save(any(User.class));
+  }
+  ```
+
+## Positive and Negative Test Cases
+
+- **Every test method must have both positive and negative test cases**  
+  - **Positive tests** verify the expected happy path behavior when valid inputs are provided.  
+  - **Negative tests** verify error handling, edge cases, and invalid input scenarios.  
+  - Use separate test methods for positive and negative scenarios.
+
+- **Positive test case naming**  
+  - Include positive scenario in method name: `methodName_withValidInput_shouldReturnSuccess()`.  
+  - Example: `authenticateUser_withValidCredentials_shouldReturnJwtToken()`.
+
+- **Negative test case naming**  
+  - Include negative scenario in method name: `methodName_withInvalidInput_shouldThrowException()` or `methodName_whenResourceNotFound_shouldReturnError()`.  
+  - Examples:  
+    - `registerUser_withDuplicateEmail_shouldThrowIllegalArgumentException()`  
+    - `getUserById_whenUserNotFound_shouldThrowNotFoundException()`  
+    - `updateUser_withInvalidId_shouldReturnBadRequest()`.
+
+- **Common negative test scenarios**  
+  - Invalid input (null, empty, invalid format).  
+  - Resource not found (404 scenarios).  
+  - Validation failures (400 scenarios).  
+  - Duplicate resource conflicts (409 scenarios).  
+  - Unauthorized access (401 scenarios).  
+  - Forbidden access (403 scenarios).  
+  - Internal server errors (500 scenarios).
+
+## Mocking Patterns
+
+- **Use `@Mock` or `Mockito.mock()` for dependencies**  
+  - Mock all external dependencies (repositories, services, clients).  
+  - Use `@InjectMocks` for the class under test when using `@ExtendWith(MockitoExtension.class)`.  
+  - Use `@MockBean` for Spring Boot integration tests to replace Spring beans.
+
+- **Mock setup in Given phase**  
+  - Configure mock behavior using `when().thenReturn()`, `when().thenThrow()`, `doNothing().when()`, etc.  
+  - Set up mock return values based on the test scenario.  
+  - Use `ArgumentMatchers` (e.g., `any()`, `anyString()`, `eq()`) when matching arguments.
+
+- **Verify mock interactions in Then phase**  
+  - Use `verify()` to ensure methods were called with expected parameters.  
+  - Use `verifyNoMoreInteractions()` to ensure no unexpected method calls occurred.  
+  - Verify the number of invocations when relevant: `verify(mock, times(n))`, `verify(mock, never())`.
+
+- **Example with mocks:**
+  ```java
+  @ExtendWith(MockitoExtension.class)
+  class RegisterServiceTest {
+      
+      @Mock
+      private UserRepository userRepository;
+      
+      @Mock
+      private RoleRepository roleRepository;
+      
+      @Mock
+      private PasswordEncoder passwordEncoder;
+      
+      @InjectMocks
+      private RegisterServiceImpl registerService;
+      
+      @Test
+      void registerUser_withDuplicateEmail_shouldThrowException() {
+          // Given
+          RegisterRequest request = RegisterRequest.builder()
+              .username("john.doe")
+              .email("existing@example.com")
+              .password("password123")
+              .build();
+          
+          when(userRepository.findByEmail(request.getEmail()))
+              .thenReturn(Optional.of(User.builder().build()));
+          
+          // When & Then
+          assertThatThrownBy(() -> registerService.register(request))
+              .isInstanceOf(IllegalArgumentException.class)
+              .hasMessageContaining("Email already exists");
+          
+          verify(userRepository, never()).save(any(User.class));
+      }
+  }
+  ```
+
+## Test Annotations and Setup
+
+- **Unit tests**  
+  - Use `@ExtendWith(MockitoExtension.class)` for pure unit tests.  
+  - Use `@Mock` and `@InjectMocks` annotations.  
+  - Avoid loading Spring context unless necessary.
+
+- **Integration tests**  
+  - Use `@SpringBootTest` for full integration tests that require Spring context.  
+  - Use `@AutoConfigureMockMvc` for web layer testing.  
+  - Use `@MockBean` to replace Spring beans with mocks.  
+  - Use `@Transactional` and `@Rollback` for database tests if needed.
+
+- **Web layer tests (controllers)**  
+  - Use `@WebMvcTest(ControllerClass.class)` for controller unit tests.  
+  - Use `MockMvc` for HTTP request/response testing.  
+  - Mock service layer dependencies with `@MockBean`.
+
+- **Test data setup**  
+  - Use `@BeforeEach` for common setup needed before each test.  
+  - Use `@BeforeAll` for one-time setup before all tests (must be static).  
+  - Initialize test data objects in the Given phase, not in setup methods unless truly shared.
+
+## Assertions
+
+- **Use AssertJ for assertions**  
+  - Prefer AssertJ fluent assertions over JUnit assertions for better readability.  
+  - Use `assertThat()` for all assertions.  
+  - Use specific assertion methods: `isEqualTo()`, `isNotNull()`, `isInstanceOf()`, `hasMessage()`, etc.
+
+- **Exception assertions**  
+  - Use `assertThatThrownBy()` for testing exceptions.  
+  - Chain assertions to verify exception type and message.  
+  - Example:  
+    ```java
+    assertThatThrownBy(() -> service.method())
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("expected message");
+    ```
+
+- **Collection assertions**  
+  - Use AssertJ collection assertions: `hasSize()`, `contains()`, `containsExactly()`, `isEmpty()`.  
+  - Verify collection contents thoroughly.
+
+- **Object assertions**  
+  - Use field-by-field assertions when verifying complex objects.  
+  - Use `usingRecursiveComparison()` for deep object comparison when needed.
+
+## Test Coverage
+
+- **Aim for comprehensive test coverage**  
+  - Test all public methods in service and controller classes.  
+  - Test both successful paths and error paths.  
+  - Test edge cases and boundary conditions.  
+  - Test null, empty, and invalid input scenarios.
+
+- **Test isolation**  
+  - Each test should be independent and not rely on the execution order.  
+  - Use `@BeforeEach` or `@AfterEach` to reset state between tests if needed.  
+  - Avoid shared mutable state between tests.
+
+## Integration Test Examples
+
+- **Controller integration test example:**
+  ```java
+  @WebMvcTest(AuthController.class)
+  class AuthControllerTest {
+      
+      @Autowired
+      private MockMvc mockMvc;
+      
+      @MockBean
+      private AuthenticationManager authenticationManager;
+      
+      @MockBean
+      private JwtService jwtService;
+      
+      @MockBean
+      private UserRepository userRepository;
+      
+      @Test
+      void login_withValidCredentials_shouldReturnJwtToken() throws Exception {
+          // Given
+          LoginRequest request = LoginRequest.builder()
+              .username("john.doe")
+              .password("password123")
+              .build();
+          
+          User user = User.builder()
+              .username("john.doe")
+              .build();
+          
+          Authentication auth = mock(Authentication.class);
+          when(authenticationManager.authenticate(any())).thenReturn(auth);
+          when(auth.getName()).thenReturn("john.doe");
+          when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
+          when(jwtService.generateToken(user)).thenReturn("jwt-token");
+          
+          // When & Then
+          mockMvc.perform(post("/api/v1/auth/login")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(request)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.data").value("jwt-token"));
+      }
+      
+      @Test
+      void login_withInvalidCredentials_shouldReturnUnauthorized() throws Exception {
+          // Given
+          LoginRequest request = LoginRequest.builder()
+              .username("invalid")
+              .password("wrong")
+              .build();
+          
+          when(authenticationManager.authenticate(any()))
+              .thenThrow(new BadCredentialsException("Invalid credentials"));
+          
+          // When & Then
+          mockMvc.perform(post("/api/v1/auth/login")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(request)))
+              .andExpect(status().isUnauthorized());
+      }
+  }
+  ```
+
+## Best Practices
+
+- **Keep tests simple and focused**  
+  - Each test should verify one specific behavior.  
+  - Avoid complex test logic; tests should be easy to understand.
+
+- **Use descriptive variable names**  
+  - Use meaningful names for test data (e.g., `validUser`, `duplicateEmailRequest`, `invalidPassword`).  
+  - Avoid generic names like `user1`, `data`, `result` when more descriptive names would clarify intent.
+
+- **Avoid test interdependencies**  
+  - Do not rely on test execution order.  
+  - Do not share mutable state between tests without proper cleanup.
+
+- **Test real behavior, not implementation details**  
+  - Test what the method does, not how it does it internally.  
+  - Focus on public APIs and contracts rather than private implementation.
+
+- **Use test builders or factory methods**  
+  - Create helper methods for building complex test objects.  
+  - Use Lombok `@Builder` for test data creation when appropriate.
