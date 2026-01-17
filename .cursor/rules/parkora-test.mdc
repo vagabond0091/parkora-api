@@ -62,14 +62,14 @@ globs: api/src/test/java/com/parkora/**
         
         // Register method tests
         @Test
-        void registerUser_withValidRequest_shouldReturnSuccess() { ... }
+        public void registerUser_withValidRequest_shouldReturnSuccess() { ... }
         
         @Test
-        void registerUser_withDuplicateEmail_shouldThrowException() { ... }
+        public void registerUser_withDuplicateEmail_shouldThrowException() { ... }
         
         // Update method tests
         @Test
-        void updateUser_withValidRequest_shouldReturnSuccess() { ... }
+        public void updateUser_withValidRequest_shouldReturnSuccess() { ... }
     }
     ```
 
@@ -84,7 +84,7 @@ globs: api/src/test/java/com/parkora/**
 - **Example structure:**
   ```java
   @Test
-  void registerUser_withValidRequest_shouldReturnSuccess() {
+  public void registerUser_withValidRequest_shouldReturnSuccess() {
       // Given
       RegisterRequest request = RegisterRequest.builder()
           .username("john.doe")
@@ -160,7 +160,7 @@ globs: api/src/test/java/com/parkora/**
       }
       
       @Test
-      void registerUser_withValidRequest_shouldReturnSuccess() {
+      public void registerUser_withValidRequest_shouldReturnSuccess() {
           // Given
           RegisterRequest request = createValidRegisterRequest();
           User savedUser = createUser(1L, "john.doe", "john@example.com");
@@ -178,7 +178,7 @@ globs: api/src/test/java/com/parkora/**
       }
       
       @Test
-      void registerUser_withDuplicateUsername_shouldThrowException() {
+      public void registerUser_withDuplicateUsername_shouldThrowException() {
           // Given
           RegisterRequest request = createValidRegisterRequest();
           User existingUser = createUser(1L, "john.doe", "john@example.com");
@@ -263,7 +263,7 @@ globs: api/src/test/java/com/parkora/**
       private RegisterServiceImpl registerService;
       
       @Test
-      void registerUser_withDuplicateEmail_shouldThrowException() {
+      public void registerUser_withDuplicateEmail_shouldThrowException() {
           // Given
           RegisterRequest request = RegisterRequest.builder()
               .username("john.doe")
@@ -370,7 +370,7 @@ globs: api/src/test/java/com/parkora/**
       private UserRepository userRepository;
       
       @Test
-      void login_withValidCredentials_shouldReturnJwtToken() throws Exception {
+      public void login_withValidCredentials_shouldReturnJwtToken() throws Exception {
           // Given
           LoginRequest request = LoginRequest.builder()
               .username("john.doe")
@@ -396,7 +396,7 @@ globs: api/src/test/java/com/parkora/**
       }
       
       @Test
-      void login_withInvalidCredentials_shouldReturnUnauthorized() throws Exception {
+      public void login_withInvalidCredentials_shouldReturnUnauthorized() throws Exception {
           // Given
           LoginRequest request = LoginRequest.builder()
               .username("invalid")
