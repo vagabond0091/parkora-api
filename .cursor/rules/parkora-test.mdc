@@ -57,6 +57,94 @@ globs: api/src/test/java/com/parkora/**
   }
   ```
 
+- **Extract reusable Given setup into helper methods**  
+  - If the Given (arrange) phase is used in multiple test cases, move it to a private helper method.  
+  - Helper methods should be descriptive and clearly indicate what they're setting up.  
+  - Use method parameters to customize the setup for different test scenarios.  
+  - This reduces code duplication and makes tests more maintainable.
+
+- **Example with helper methods:**
+  ```java
+  @ExtendWith(MockitoExtension.class)
+  class RegisterServiceTest {
+      
+      @Mock
+      private UserRepository userRepository;
+      
+      @Mock
+      private RoleRepository roleRepository;
+      
+      @InjectMocks
+      private RegisterServiceImpl registerService;
+      
+      // Helper method for common setup
+      private RegisterRequest createValidRegisterRequest() {
+          return RegisterRequest.builder()
+              .username("john.doe")
+              .email("john@example.com")
+              .password("password123")
+              .firstName("John")
+              .lastName("Doe")
+              .build();
+      }
+      
+      // Helper method with parameters for flexibility
+      private User createUser(Long id, String username, String email) {
+          return User.builder()
+              .id(id)
+              .username(username)
+              .email(email)
+              .build();
+      }
+      
+      // Helper method for mocking repository behavior
+      private void mockUserNotFound(String username, String email) {
+          when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+          when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+      }
+      
+      @Test
+      void registerUser_withValidRequest_shouldReturnSuccess() {
+          // Given
+          RegisterRequest request = createValidRegisterRequest();
+          User savedUser = createUser(1L, "john.doe", "john@example.com");
+          
+          mockUserNotFound(request.getUsername(), request.getEmail());
+          when(userRepository.save(any(User.class))).thenReturn(savedUser);
+          
+          // When
+          User result = registerService.register(request);
+          
+          // Then
+          assertThat(result).isNotNull();
+          assertThat(result.getUsername()).isEqualTo("john.doe");
+          verify(userRepository).save(any(User.class));
+      }
+      
+      @Test
+      void registerUser_withDuplicateUsername_shouldThrowException() {
+          // Given
+          RegisterRequest request = createValidRegisterRequest();
+          User existingUser = createUser(1L, "john.doe", "john@example.com");
+          
+          when(userRepository.findByUsername(request.getUsername()))
+              .thenReturn(Optional.of(existingUser));
+          
+          // When & Then
+          assertThatThrownBy(() -> registerService.register(request))
+              .isInstanceOf(IllegalArgumentException.class)
+              .hasMessageContaining("Username already exists");
+          
+          verify(userRepository, never()).save(any(User.class));
+      }
+  }
+  ```
+
+- **When to extract helper methods**  
+  - Extract when the same Given setup appears in 2 or more test methods.  
+  - Extract when setup logic is complex and would benefit from being readable as a method call.  
+  - Do not extract one-off setup that is specific to a single test case.
+
 ## Positive and Negative Test Cases
 
 - **Every test method must have both positive and negative test cases**  
