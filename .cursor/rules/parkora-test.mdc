@@ -5,6 +5,34 @@ globs: api/src/test/java/com/parkora/**
 
 # Parkora JUnit Testing Conventions
 
+## Testing Strategy and Priorities
+
+- **Primary focus: Service implementation tests**  
+  - The service layer contains the core business logic and should be the primary focus of testing.  
+  - Controllers are thin layers that primarily handle HTTP concerns (request/response mapping, status codes).  
+  - Service tests verify business rules, data validation, error handling, and integration with repositories.  
+  - All service implementation classes (`*ServiceImpl`) must have comprehensive test coverage with both positive and negative test cases.
+
+- **Controller tests: Optional and minimal**  
+  - Controllers typically just delegate to services and map DTOs, so comprehensive controller testing is often redundant.  
+  - Controller tests are optional unless the controller has complex request/response mapping or validation logic.  
+  - If controller tests are needed, focus on:  
+    - HTTP status code verification  
+    - Request validation annotations (`@Valid`, `@NotBlank`, etc.)  
+    - Response DTO mapping  
+    - Security/authorization annotations  
+  - Use `@WebMvcTest` for isolated controller testing, or `@SpringBootTest` with `MockMvc` for integration-style tests when needed.
+
+- **Repository tests: Only when needed**  
+  - Repository tests are typically not necessary when using Spring Data JPA.  
+  - Only test repositories if they contain custom query methods with complex logic.  
+  - For standard CRUD operations, service tests provide sufficient coverage.
+
+- **Integration tests: For critical flows**  
+  - Write integration tests (`@SpringBootTest`) for critical end-to-end flows (e.g., authentication, registration).  
+  - Integration tests verify the integration between multiple layers (controller → service → repository).  
+  - Use sparingly due to slower execution time; prefer service unit tests when possible.
+
 ## Test Structure and Naming
 
 - **Test class naming**  
@@ -278,9 +306,10 @@ globs: api/src/test/java/com/parkora/**
 
 ## Test Coverage
 
-- **Aim for comprehensive test coverage**  
-  - Test all public methods in service and controller classes.  
-  - Test both successful paths and error paths.  
+- **Aim for comprehensive test coverage in service layer**  
+  - **Service implementations**: Test all public methods in `*ServiceImpl` classes with comprehensive coverage.  
+  - **Controllers**: Testing is optional; focus on service layer instead. Only test controllers when they have complex logic beyond simple delegation.  
+  - Test both successful paths and error paths for all service methods.  
   - Test edge cases and boundary conditions.  
   - Test null, empty, and invalid input scenarios.
 
@@ -291,7 +320,11 @@ globs: api/src/test/java/com/parkora/**
 
 ## Integration Test Examples
 
-- **Controller integration test example:**
+- **Note: Controller tests are optional**  
+  - Controller tests shown below are for reference when needed (e.g., testing validation, HTTP status codes, or security).  
+  - Primary testing focus should be on service implementations.
+
+- **Controller integration test example (when needed):**
   ```java
   @WebMvcTest(AuthController.class)
   class AuthControllerTest {
