@@ -47,15 +47,19 @@ public class RegisterServiceImpl implements RegisterService {
                 .status(User.UserStatus.ACTIVE)
                 .build();
 
-        // Assign default role (ROLE_USER) if it exists, otherwise create a set with no roles
+        // Create or get PARTNERS role
         Set<Role> roles = new HashSet<>();
-        Role defaultRole = roleRepository.findByName("ROLE_USER")
-                .orElse(roleRepository.findByName("USER")
-                        .orElse(null));
+        Role partnersRole = roleRepository.findByName("PARTNERS")
+                .orElseGet(() -> {
+                    // Create PARTNERS role if it doesn't exist
+                    Role newRole = Role.builder()
+                            .name("PARTNERS")
+                            .description("Partners role")
+                            .build();
+                    return roleRepository.save(newRole);
+                });
         
-        if (defaultRole != null) {
-            roles.add(defaultRole);
-        }
+        roles.add(partnersRole);
         user.setRoles(roles);
 
         // Save and return the user

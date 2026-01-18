@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +26,7 @@ public class RegisterController {
     private final RegisterService registerService;
     private final JwtService jwtService;
 
-    @PostMapping(value = "/register", consumes = {"application/json", "multipart/form-data", "application/x-www-form-urlencoded"})
+    @PostMapping(value = "/register/partners", consumes = {"application/json", "multipart/form-data", "application/x-www-form-urlencoded"})
     public ResponseEntity<ApiResponse<String>> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest) {
         try {
             // Register the user
