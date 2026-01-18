@@ -56,7 +56,6 @@ public class JwtService {
         claims.put("email", user.getEmail());
         claims.put("firstName", user.getFirstName());
         claims.put("lastName", user.getLastName());
-        claims.put("phone", user.getPhone());
         claims.put("status", user.getStatus().name());
         
         // Add roles as a list of role names
