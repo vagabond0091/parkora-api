@@ -1,4 +1,4 @@
-package com.parkora.api.dto;
+package com.parkora.api.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
