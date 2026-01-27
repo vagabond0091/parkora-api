@@ -1,7 +1,7 @@
 package com.parkora.api.controller;
 
-import com.parkora.api.dto.ApiResponse;
 import com.parkora.api.dto.RegisterRequest;
+import com.parkora.api.dto.common.ApiResponse;
 import com.parkora.api.entity.User;
 import com.parkora.api.service.JwtService;
 import com.parkora.api.service.RegisterService;

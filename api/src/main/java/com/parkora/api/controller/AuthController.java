@@ -1,7 +1,7 @@
 package com.parkora.api.controller;
 
-import com.parkora.api.dto.ApiResponse;
 import com.parkora.api.dto.LoginRequest;
+import com.parkora.api.dto.common.ApiResponse;
 import com.parkora.api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
