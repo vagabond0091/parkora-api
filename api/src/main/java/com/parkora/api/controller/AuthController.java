@@ -34,7 +34,7 @@ public class AuthController {
             // Build API response
             ApiResponse<String> response = ApiResponse.<String>builder()
                     .message("Login successful")
-                    .errorCode(200)
+                    .code(200)
                     .status("SUCCESS")
                     .data(jwt)
                     .build();
@@ -47,7 +47,7 @@ public class AuthController {
             
             ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                     .message("Invalid username or password")
-                    .errorCode(401)
+                    .code(401)
                     .status("UNAUTHORIZED")
                     .data(null)
                     .build();
@@ -59,7 +59,7 @@ public class AuthController {
             
             ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                     .message("Invalid username or password")
-                    .errorCode(401)
+                    .code(401)
                     .status("UNAUTHORIZED")
                     .data(null)
                     .build();
@@ -71,7 +71,7 @@ public class AuthController {
             
             ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                     .message("Login failed: " + e.getMessage())
-                    .errorCode(500)
+                    .code(500)
                     .status("INTERNAL_ERROR")
                     .data(null)
                     .build();

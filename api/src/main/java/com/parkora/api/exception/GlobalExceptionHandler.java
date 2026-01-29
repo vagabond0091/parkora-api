@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .message(message)
-                .errorCode(415)
+                .code(415)
                 .status("UNSUPPORTED_MEDIA_TYPE")
                 .data(errorDetails)
                 .build();
@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .message("Validation failed")
-                .errorCode(400)
+                .code(400)
                 .status("BAD_REQUEST")
                 .data(errors)
                 .build();
@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .message("Validation failed")
-                .errorCode(400)
+                .code(400)
                 .status("BAD_REQUEST")
                 .data(errors)
                 .build();
@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .message(message)
-                .errorCode(400)
+                .code(400)
                 .status("BAD_REQUEST")
                 .data(null)
                 .build();
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .message(String.format("Invalid value '%s' for parameter '%s'", ex.getValue(), ex.getName()))
-                .errorCode(400)
+                .code(400)
                 .status("BAD_REQUEST")
                 .data(null)
                 .build();
@@ -133,7 +133,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .message("An unexpected error occurred: " + ex.getMessage())
-                .errorCode(500)
+                .code(500)
                 .status("INTERNAL_ERROR")
                 .data(null)
                 .build();

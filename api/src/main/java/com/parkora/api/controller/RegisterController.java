@@ -38,7 +38,7 @@ public class RegisterController {
             // Build API response
             ApiResponse<String> response = ApiResponse.<String>builder()
                     .message("User registered successfully")
-                    .errorCode(201)
+                    .code(201)
                     .status("CREATED")
                     .data(token)
                     .build();
@@ -52,7 +52,7 @@ public class RegisterController {
             
             ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                     .message(e.getMessage())
-                    .errorCode(409)
+                    .code(409)
                     .status("CONFLICT")
                     .data(null)
                     .build();
@@ -65,7 +65,7 @@ public class RegisterController {
             
             ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                     .message("Registration failed: " + e.getMessage())
-                    .errorCode(500)
+                    .code(500)
                     .status("INTERNAL_ERROR")
                     .data(null)
                     .build();

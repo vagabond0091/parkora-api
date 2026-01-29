@@ -49,11 +49,11 @@ public class RegisterServiceImpl implements RegisterService {
 
         // Create or get PARTNERS role
         Set<Role> roles = new HashSet<>();
-        Role partnersRole = roleRepository.findByName("PARTNERS")
+        Role partnersRole = roleRepository.findByName("tests")
                 .orElseGet(() -> {
                     // Create PARTNERS role if it doesn't exist
                     Role newRole = Role.builder()
-                            .name("PARTNERS")
+                            .name("tests")
                             .description("Partners role")
                             .build();
                     return roleRepository.save(newRole);
