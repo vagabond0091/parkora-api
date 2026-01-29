@@ -10,7 +10,7 @@ public enum UserRole {
 
     ADMIN("Administrator"),
     CUSTOMER("Customer"),
-    MODERATOR("Moderator");
+    PARTNERS("Partners");
 
     private final String description;
 

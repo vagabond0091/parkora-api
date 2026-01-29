@@ -50,11 +50,11 @@ public class RegisterServiceImpl implements RegisterService {
 
         // Create or get USER role
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(UserRole.CUSTOMER.getAuthorityName())
+        Role userRole = roleRepository.findByName(UserRole.PARTNERS.getAuthorityName())
                 .orElseGet(() -> {
                     Role newRole = Role.builder()
-                            .name(UserRole.CUSTOMER.getAuthorityName())
-                            .description(UserRole.CUSTOMER.getDescription())
+                            .name(UserRole.PARTNERS.getAuthorityName())
+                            .description(UserRole.PARTNERS.getDescription())
                             .build();
                     return roleRepository.save(newRole);
                 });
