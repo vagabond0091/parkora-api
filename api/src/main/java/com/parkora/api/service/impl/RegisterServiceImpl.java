@@ -3,6 +3,7 @@ package com.parkora.api.service.impl;
 import com.parkora.api.dto.RegisterRequest;
 import com.parkora.api.entity.Role;
 import com.parkora.api.entity.User;
+import com.parkora.api.enums.UserRole;
 import com.parkora.api.repository.RoleRepository;
 import com.parkora.api.repository.UserRepository;
 import com.parkora.api.service.RegisterService;
@@ -47,19 +48,18 @@ public class RegisterServiceImpl implements RegisterService {
                 .status(User.UserStatus.ACTIVE)
                 .build();
 
-        // Create or get PARTNERS role
+        // Create or get USER role
         Set<Role> roles = new HashSet<>();
-        Role partnersRole = roleRepository.findByName("tests")
+        Role userRole = roleRepository.findByName(UserRole.CUSTOMER.getAuthorityName())
                 .orElseGet(() -> {
-                    // Create PARTNERS role if it doesn't exist
                     Role newRole = Role.builder()
-                            .name("tests")
-                            .description("Partners role")
+                            .name(UserRole.CUSTOMER.getAuthorityName())
+                            .description(UserRole.CUSTOMER.getDescription())
                             .build();
                     return roleRepository.save(newRole);
                 });
-        
-        roles.add(partnersRole);
+
+        roles.add(userRole);
         user.setRoles(roles);
 
         // Save and return the user
