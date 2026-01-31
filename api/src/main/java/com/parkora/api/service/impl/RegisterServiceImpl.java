@@ -29,12 +29,12 @@ public class RegisterServiceImpl implements RegisterService {
     public User register(RegisterRequest registerRequest) {
         // Check if username already exists
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new IllegalArgumentException("Username already exists: " + registerRequest.getUsername());
+            throw new IllegalArgumentException("Username already exists!");
         }
 
         // Check if email already exists
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new IllegalArgumentException("Email already exists: " + registerRequest.getEmail());
+            throw new IllegalArgumentException("Email already exists!");
         }
 
         // Create new user
