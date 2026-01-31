@@ -1,5 +1,6 @@
 package com.parkora.api.controller;
 
+import com.parkora.api.constant.ApiConstants;
 import com.parkora.api.dto.LoginRequest;
 import com.parkora.api.dto.common.ApiResponse;
 import com.parkora.api.service.AuthService;
@@ -15,10 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(ApiConstants.API + ApiConstants.VERSION + ApiConstants.AUTH)
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Parkora API for authentication")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
